@@ -13,12 +13,12 @@ import { getFirestore } from "firebase/firestore";
 // NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
+  projectId: "studio-8431315151-41f4f",
+  appId: "1:444802905508:web:7f608bffed844f64af7d31",
+  apiKey: "AIzaSyCNluEV_MJym_0oKYPUlumt4gG5kDq6T14",
+  authDomain: "studio-8431315151-41f4f.firebaseapp.com",
+  measurementId: "",
+  messagingSenderId: "444802905508",
 };
 
 // Initialize Firebase for SSR and SSG, preventing re-initialization on client-side hot-reloads.
