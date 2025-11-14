@@ -203,6 +203,13 @@ export function Counter({ setShowFire }: CounterProps) {
   };
   
   const progress = count !== null ? count % 10 : 0;
+  
+  const pulseStyle = {
+    '--pulse-blur-start': '20px',
+    '--pulse-spread-start': '0px',
+    '--pulse-blur-end': `clamp(40px, ${40 + (count ?? 0) * 2}px, 200px)`,
+    '--pulse-spread-end': `clamp(0px, ${(count ?? 0)}px, 100px)`
+  } as React.CSSProperties;
 
   return (
      <div className="flex flex-col items-center gap-8">
@@ -236,6 +243,7 @@ export function Counter({ setShowFire }: CounterProps) {
                 onClick={handleIncrement}
                 disabled={loading || !user}
                 className="w-full transform rounded-xl py-8 text-xl font-bold transition-transform duration-100 ease-in-out active:scale-95 animate-cosmic-pulse"
+                style={pulseStyle}
               >
                 {user ? (loading ? '...' : '¡Incrementar Poder!') : <><Lock className="mr-2" /> Inicia sesión para pulsar</>}
               </Button>

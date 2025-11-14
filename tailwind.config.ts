@@ -1,3 +1,4 @@
+
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -89,8 +90,8 @@ export default {
           },
         },
         'cosmic-pulse': {
-          '0%, 100%': { transform: 'scale(1)', boxShadow: '0 0 20px hsl(var(--primary))' },
-          '50%': { transform: 'scale(1.05)', boxShadow: '0 0 40px hsl(var(--accent)), 0 0 60px hsl(var(--primary))' },
+          '0%, 100%': { transform: 'scale(1)', boxShadow: '0 0 var(--pulse-blur-start) var(--pulse-spread-start) hsl(var(--primary))' },
+          '50%': { transform: 'scale(1.05)', boxShadow: '0 0 var(--pulse-blur-end) var(--pulse-spread-end) hsl(var(--accent)), 0 0 calc(var(--pulse-blur-end) * 1.5) calc(var(--pulse-spread-end) * 1.5) hsl(var(--primary))' },
         },
         'epic-enter': {
            '0%': { transform: 'scale(0.5) rotate(-15deg)', opacity: '0' },
