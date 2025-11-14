@@ -79,7 +79,7 @@ export function Counter() {
     if (newCount > 0 && newCount % 10 === 0) {
       toast({
         title: "¡¡SINGULARIDAD ALCANZADA!!",
-        description: `¡Has superado los ${newCount} clics! Tu poder está reescribiendo las leyes de la realidad.`,
+        description: `Has superado los ${newCount} clics. El universo se asombra ante tu poder. Las leyes de la física se desmoronan.`,
         variant: "default",
         duration: 5000,
       });
@@ -172,7 +172,7 @@ export function Counter() {
               <Button
                 onClick={handleIncrement}
                 disabled={loading || !user}
-                className="w-full transform rounded-xl py-8 text-xl font-bold transition-transform duration-100 ease-in-out active:scale-95 shadow-[0_0_20px_hsl(var(--primary))]"
+                className="w-full transform rounded-xl py-8 text-xl font-bold transition-transform duration-100 ease-in-out active:scale-95 animate-cosmic-pulse"
               >
                 {user ? (loading ? '...' : '¡Incrementar Poder!') : <><Lock className="mr-2" /> Inicia sesión para pulsar</>}
               </Button>
