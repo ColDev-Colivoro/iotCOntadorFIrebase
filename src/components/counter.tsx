@@ -48,6 +48,14 @@ const themes = {
   }
 };
 
+const milestoneMessages = [
+    { title: "¡Buen Comienzo!", description: (count: number) => `Has alcanzado los ${count} clics. ¡Sigue así!` },
+    { title: "¡Poder Creciente!", description: (count: number) => `¡${count} clics! El universo empieza a notarte.` },
+    { title: "¡Fuerza Imparable!", description: (count: number) => `¡${count} clics! La realidad se tambalea con tu poder.` },
+    { title: "¡DOMINACIÓN CÓSMICA!", description: (count: number) => `¡${count} clics! Los agujeros negros sienten envidia.` },
+];
+
+
 const applyTheme = (theme: typeof themes.default) => {
   const root = document.documentElement;
   Object.entries(theme).forEach(([key, value]) => {
@@ -136,14 +144,19 @@ export function Counter({ setShowFire }: CounterProps) {
 
     setLoading(true);
     const newCount = (count ?? 0) + 1;
-    if (newCount > 0 && newCount % 10 === 0) {
-      toast({
-        title: "¡¡SINGULARIDAD ALCANZADA!!",
-        description: `Has superado los ${newCount} clics. El universo se asombra ante tu poder. Las leyes de la física se desmoronan.`,
-        variant: "default",
-        duration: 5000,
-      });
+    if (newCount > 0 && newCount % 10 === 0 && newCount < 50) {
+        const messageIndex = (newCount / 10) - 1;
+        const message = milestoneMessages[messageIndex];
+        if (message) {
+            toast({
+                title: message.title,
+                description: message.description(newCount),
+                variant: "default",
+                duration: 5000,
+            });
+        }
     }
+
 
     const data = { value: increment(1), updatedAt: serverTimestamp() };
     
@@ -207,8 +220,8 @@ export function Counter({ setShowFire }: CounterProps) {
   const pulseStyle = {
     '--pulse-blur-start': '20px',
     '--pulse-spread-start': '0px',
-    '--pulse-blur-end': `clamp(40px, ${40 + (count ?? 0) * 40}px, 4000px)`,
-    '--pulse-spread-end': `clamp(0px, ${(count ?? 0) * 32}px, 2000px)`
+    '--pulse-blur-end': `clamp(40px, ${40 + (count ?? 0) * 80}px, 8000px)`,
+    '--pulse-spread-end': `clamp(0px, ${(count ?? 0) * 64}px, 4000px)`
   } as React.CSSProperties;
 
   return (
