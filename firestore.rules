@@ -2,74 +2,39 @@
  * @file Firebase Security Rules for ClickSync application.
  *
  * Core Philosophy:
- * This ruleset enforces a strict user-ownership model for user-specific data, ensuring that users can only access their own data.
- * The global counter is publicly readable but can only be modified by authenticated users.
+ * This ruleset enforces a strict user-ownership model, ensuring that users can only access and modify their own data.
  *
  * Data Structure:
- * - /users/{userId}: Private user data.
- * - /counters/main_counter: A single document for the global click count.
+ * - /users/{userId}: Private user profile data.
+ * - /users/{userId}/counters/{counterId}: Counters belonging to a specific user.
  *
  * Key Security Decisions:
- * - Users can only create, read, update, and delete their own user documents.
+ * - Users can only create, read, update, and delete their own documents.
  * - Listing other users is not permitted.
- * - Anyone can read the main counter.
- * - Only authenticated users can increment the main counter.
+ * - A user can manage their own counters, but not the counters of others.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description: Controls access to user profile data.
-     * @path: /users/{userId}
-     * @allow: User 'user123' can create their own profile (create).
-     * @deny: User 'user456' cannot create a profile for 'user123' (create).
-     * @principle: Enforces document ownership for user profiles.
+     * @description Controls access to user-specific data, including profiles and their subcollections.
+     * @path /users/{userId}
      */
     match /users/{userId} {
-      function isSignedIn() {
-        return request.auth != null;
-      }
-
-      function isOwner(userId) {
-        return request.auth.uid == userId;
-      }
-
-      // Allow a user to create their own profile if the userId matches their auth UID.
-      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.id == userId;
-
-      // Allow a user to get their own profile.
-      allow get: if isSignedIn() && isOwner(userId);
-
-      // Allow a user to update their own profile, but only if the userId remains unchanged.
-      allow update: if isSignedIn() && isOwner(userId) && resource.data.id == userId;
-
-      // Allow a user to delete their own profile.
-      allow delete: if isSignedIn() && isOwner(userId) && resource != null;
-
-      // Do not allow listing of all users. This is a security best practice.
+      // A user can read, write, and delete their own user document.
+      // They cannot list other user documents.
+      allow read, write, delete: if request.auth.uid == userId;
       allow list: if false;
-    }
 
-    /**
-     * @description: Controls access to the global counter document.
-     * @path: /counters/main_counter
-     * @allow: Anyone can read the counter value.
-     * @allow: Authenticated users can update (increment) the counter.
-     * @principle: Public read, authenticated write.
-     */
-    match /counters/main_counter {
-       function isSignedIn() {
-        return request.auth != null;
+      /**
+       * @description Controls access to a user's counters.
+       * @path /users/{userId}/counters/{counterId}
+       */
+      match /counters/{counterId} {
+        // A user can read and write (create, update, delete) their own counters.
+        allow read, write: if request.auth.uid == userId;
       }
-      
-      // Allow anyone to read the global counter.
-      allow get: if true;
-
-      // Allow any authenticated user to create or update the counter.
-      // This allows the first clicker to create the document and subsequent
-      // clickers to increment it.
-      allow write: if isSignedIn();
     }
   }
 }
