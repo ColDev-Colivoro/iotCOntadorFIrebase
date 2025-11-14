@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Dispatch, SetStateAction } from "react";
 import { doc, onSnapshot, setDoc, increment, serverTimestamp, collection, addDoc } from "firebase/firestore";
 import { useUser, useFirestore, useMemoFirebase } from "@/firebase";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,47 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-export function Counter() {
+interface CounterProps {
+  setShowFire: Dispatch<SetStateAction<boolean>>;
+}
+
+const themes = {
+  default: {
+    '--background': '224 71% 4%',
+    '--foreground': '210 40% 98%',
+    '--primary': '198 93% 60%',
+    '--accent': '45 93% 47%',
+  },
+  electric: {
+    '--background': '255 50% 5%',
+    '--foreground': '255 80% 98%',
+    '--primary': '280 84% 67%',
+    '--accent': '180 90% 50%',
+  },
+  inferno: {
+    '--background': '15 100% 3%',
+    '--foreground': '30 100% 95%',
+    '--primary': '0 100% 50%',
+    '--accent': '30 100% 50%',
+  }
+};
+
+const applyTheme = (theme: typeof themes.default) => {
+  const root = document.documentElement;
+  Object.entries(theme).forEach(([key, value]) => {
+    root.style.setProperty(key, value);
+  });
+};
+
+const applyRandomColors = () => {
+    const root = document.documentElement;
+    const newPrimaryHue = Math.random() * 360;
+    const newAccentHue = (newPrimaryHue + 180) % 360;
+    root.style.setProperty('--primary', `${newPrimaryHue} 93% 60%`);
+    root.style.setProperty('--accent', `${newAccentHue} 93% 47%`);
+}
+
+export function Counter({ setShowFire }: CounterProps) {
   const { user } = useUser();
   const firestore = useFirestore();
   const [count, setCount] = useState<number | null>(null);
@@ -34,6 +74,22 @@ export function Counter() {
     if (!firestore || !user) return null;
     return doc(firestore, "users", user.uid, "counters", "user_counter");
   }, [firestore, user]);
+
+  useEffect(() => {
+    if (count === null) return;
+    
+    if (count > 30) {
+      setShowFire(true);
+      applyTheme(themes.inferno);
+    } else if (count > 10) {
+      setShowFire(false);
+      applyTheme(themes.electric);
+    } else {
+      setShowFire(false);
+      applyTheme(themes.default);
+    }
+
+  }, [count, setShowFire]);
 
   useEffect(() => {
     if (!counterDocRef) {
@@ -73,6 +129,10 @@ export function Counter() {
       });
       return;
     }
+    
+    if(count !== null && count > 30) {
+        applyRandomColors();
+    }
 
     setLoading(true);
     const newCount = (count ?? 0) + 1;
@@ -109,6 +169,9 @@ export function Counter() {
       });
       return;
     }
+    
+    setShowFire(false);
+    applyTheme(themes.default);
 
     // Save reset log
     const resetsColRef = collection(firestore, "users", user.uid, "resets");
