@@ -37,7 +37,7 @@ export function DatabaseView() {
     return query(collectionGroup(firestore, 'counters'));
   }, [firestore]);
 
-  const { data: counters, isLoading, error } = useCollection<CounterData>(countersQuery);
+  const { data: counters, isLoading, error } = useCollection<CounterData>(countersQuery, !!firestore);
 
   const sortedCounters = useMemo(() => {
     if (!counters) return [];
