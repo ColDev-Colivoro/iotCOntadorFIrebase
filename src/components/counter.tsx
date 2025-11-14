@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { doc, onSnapshot, setDoc, increment, serverTimestamp, collection, addDoc } from "firebase/firestore";
 import { useUser, useFirestore, useMemoFirebase } from "@/firebase";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Lock, RotateCcw } from "lucide-react";
 import { FirestorePermissionError } from "@/firebase/errors";
 import { errorEmitter } from "@/firebase/error-emitter";
+import { ProgressCircle } from "@/components/progress-circle";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,18 +37,15 @@ export function Counter() {
 
   useEffect(() => {
     if (!counterDocRef) {
-      setCount(0); // If no user, show 0
+      setCount(0);
       return;
     }
 
     const unsubscribe = onSnapshot(
       counterDocRef,
       (docSnap) => {
-        if (docSnap.exists()) {
-          setCount(docSnap.data().value);
-        } else {
-          setCount(0); // If doc doesn't exist yet, display 0
-        }
+        const currentCount = docSnap.exists() ? docSnap.data().value : 0;
+        setCount(currentCount);
       },
       (error) => {
         if (!counterDocRef) return;
@@ -67,7 +65,7 @@ export function Counter() {
     return () => unsubscribe();
   }, [counterDocRef, toast, user]);
 
-  const handleIncrement = () => {
+  const handleIncrement = useCallback(() => {
     if (!user || !counterDocRef) {
       toast({
         title: "Autenticación Requerida",
@@ -77,6 +75,14 @@ export function Counter() {
     }
 
     setLoading(true);
+    const newCount = (count ?? 0) + 1;
+    if (newCount > 0 && newCount % 20 === 0) {
+      toast({
+        title: "¡Nivel Superado!",
+        description: `¡Has alcanzado ${newCount} clics! Sigue así.`,
+      });
+    }
+
     const data = { value: increment(1), updatedAt: serverTimestamp() };
     
     setDoc(counterDocRef, data, { merge: true })
@@ -91,7 +97,7 @@ export function Counter() {
       .finally(() => {
         setTimeout(() => setLoading(false), 300);
       });
-  };
+  }, [user, counterDocRef, toast, count]);
 
   const handleReset = () => {
     if (!user || !firestore || !counterDocRef || count === null) {
@@ -130,52 +136,68 @@ export function Counter() {
         errorEmitter.emit('permission-error', permissionError);
       });
   };
+  
+  const progress = count !== null ? count % 20 : 0;
 
   return (
-    <Card className="w-full max-w-sm text-center shadow-2xl bg-card/80 backdrop-blur-sm">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold tracking-tight">Tu Contador de Clics</CardTitle>
-        <CardDescription>Este es tu contador personal de clics.</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col items-center gap-6">
-        <div className="font-black text-primary transition-all text-8xl md:text-9xl">
-          {count !== null ? (
-            <span className="tabular-nums">{count.toLocaleString()}</span>
-          ) : (
-            <div className="h-[96px] w-[180px] animate-pulse rounded-lg bg-muted-foreground/20 md:h-[115px]" />
-          )}
+     <div className="flex flex-col items-center gap-8">
+        <div className="relative flex flex-col items-center gap-4">
+          <ProgressCircle progress={progress} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+            <h2 className="text-5xl font-extrabold tracking-tighter sm:text-6xl md:text-7xl">
+              La Super Plataforma de Clics
+            </h2>
+            <p className="max-w-[700px] text-lg text-muted-foreground mt-2">
+              Cada clic es una victoria. Demuestra tu poder.
+            </p>
+          </div>
         </div>
-        <div className="flex flex-col w-full gap-2">
-           <Button
-            onClick={handleIncrement}
-            disabled={loading || !user}
-            className="w-full transform rounded-xl py-6 text-lg font-bold transition-transform duration-100 ease-in-out active:scale-95"
-          >
-            {user ? (loading ? '...' : '¡Púlsame!') : <><Lock className="mr-2" /> Inicia sesión para pulsar</>}
-          </Button>
 
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline" disabled={!user}>
-                <RotateCcw />
-                Reiniciar Contador
+        <Card className="w-full max-w-sm text-center shadow-2xl bg-card/80 backdrop-blur-sm z-10">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold tracking-tight">Tu Puntuación Universal</CardTitle>
+            <CardDescription>Este es tu contador de poder personal.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center gap-6">
+            <div className="font-black text-primary transition-all text-8xl md:text-9xl">
+              {count !== null ? (
+                <span className="tabular-nums">{count.toLocaleString()}</span>
+              ) : (
+                <div className="h-[96px] w-[180px] animate-pulse rounded-lg bg-muted-foreground/20 md:h-[115px]" />
+              )}
+            </div>
+            <div className="flex flex-col w-full gap-2">
+              <Button
+                onClick={handleIncrement}
+                disabled={loading || !user}
+                className="w-full transform rounded-xl py-6 text-lg font-bold transition-transform duration-100 ease-in-out active:scale-95"
+              >
+                {user ? (loading ? '...' : '¡Incrementar Poder!') : <><Lock className="mr-2" /> Inicia sesión para pulsar</>}
               </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>¿Estás absolutamente seguro?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Esta acción no se puede deshacer. Esto reiniciará permanentemente tu contador de clics a 0.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction onClick={handleReset}>Continuar</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-      </CardContent>
-    </Card>
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" disabled={!user}>
+                    <RotateCcw />
+                    Reiniciar Contador
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>¿Estás absolutamente seguro?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Esta acción no se puede deshacer. Esto reiniciará permanentemente tu contador de clics a 0.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleReset}>Continuar</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </CardContent>
+        </Card>
+    </div>
   );
 }
