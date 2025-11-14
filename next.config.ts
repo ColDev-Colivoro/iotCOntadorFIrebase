@@ -31,14 +31,14 @@ const nextConfig: NextConfig = {
     ],
   },
   devIndicators: {
-    buildActivity: true,
-    buildActivityPosition: 'bottom-right',
+    position: 'bottom-right',
   },
   experimental: {
-    allowedDevOrigins: [
-      'https://*.cloudworkstations.dev',
-    ],
+    // allowedDevOrigins se movió fuera de experimental
   },
+  allowedDevOrigins: [
+    'https://*.cloudworkstations.dev',
+  ],
 };
 
 export default nextConfig;
