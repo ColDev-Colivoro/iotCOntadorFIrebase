@@ -1,7 +1,7 @@
 
 "use client";
 
-import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
+import { GoogleAuthProvider, signInWithRedirect, signOut } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -24,12 +24,12 @@ export function UserAuth() {
     const provider = new GoogleAuthProvider();
     try {
       if (!auth) return;
-      await signInWithPopup(auth, provider);
-    } catch (error) {
+      await signInWithRedirect(auth, provider);
+    } catch (error: any) {
       console.error("Error signing in with Google: ", error);
       toast({
         title: "Sign-in Failed",
-        description: "There was an error signing in. Please try again.",
+        description: error.message || "There was an error signing in. Please try again.",
         variant: "destructive",
       });
     }
@@ -39,11 +39,11 @@ export function UserAuth() {
     try {
       if (!auth) return;
       await signOut(auth);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error signing out: ", error);
       toast({
         title: "Sign-out Failed",
-        description: "There was an error signing out. Please try again.",
+        description: error.message || "There was an error signing out. Please try again.",
         variant: "destructive",
       });
     }
