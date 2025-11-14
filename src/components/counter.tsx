@@ -207,13 +207,13 @@ export function Counter({ setShowFire }: CounterProps) {
   const pulseStyle = {
     '--pulse-blur-start': '20px',
     '--pulse-spread-start': '0px',
-    '--pulse-blur-end': `clamp(40px, ${40 + (count ?? 0) * 20}px, 1000px)`,
-    '--pulse-spread-end': `clamp(0px, ${(count ?? 0) * 8}px, 500px)`
+    '--pulse-blur-end': `clamp(40px, ${40 + (count ?? 0) * 40}px, 4000px)`,
+    '--pulse-spread-end': `clamp(0px, ${(count ?? 0) * 32}px, 2000px)`
   } as React.CSSProperties;
 
   return (
      <div className="flex flex-col items-center gap-8">
-      {count === null || count < 100 ? (
+      {count === null || count < 50 ? (
           <>
           <div className="relative flex flex-col items-center gap-4">
             <ProgressCircle progress={progress} />
