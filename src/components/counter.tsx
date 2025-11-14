@@ -49,10 +49,10 @@ const themes = {
 };
 
 const milestoneMessages = [
-    { title: "¡Buen Comienzo!", description: (count: number) => `Has alcanzado los ${count} clics. ¡Sigue así!` },
-    { title: "¡Poder Creciente!", description: (count: number) => `¡${count} clics! El universo empieza a notarte.` },
-    { title: "¡Fuerza Imparable!", description: (count: number) => `¡${count} clics! La realidad se tambalea con tu poder.` },
-    { title: "¡DOMINACIÓN CÓSMICA!", description: (count: number) => `¡${count} clics! Los agujeros negros sienten envidia.` },
+    { title: "¡Despertar del Poder!", description: (count: number) => `¡${count} clics! Has rasgado el velo de la realidad. Esto es solo el principio.` },
+    { title: "¡Frecuencia Cósmica!", description: (count: number) => `¡${count} clics! Los ecos de tu poder resuenan en las supernovas lejanas.` },
+    { title: "¡DESTRUCTOR DE REALIDADES!", description: (count: number) => `¡${count} clics! Las leyes de la física son meras sugerencias para ti.` },
+    { title: "¡APOTEOSIS DEL CLIC!", description: (count: number) => `¡${count} clics! El Big Bang fue solo un susurro comparado con tu poder. Eres uno con el cosmos.` },
 ];
 
 
@@ -220,8 +220,8 @@ export function Counter({ setShowFire }: CounterProps) {
   const pulseStyle = {
     '--pulse-blur-start': '20px',
     '--pulse-spread-start': '0px',
-    '--pulse-blur-end': `clamp(40px, ${40 + (count ?? 0) * 80}px, 8000px)`,
-    '--pulse-spread-end': `clamp(0px, ${(count ?? 0) * 64}px, 4000px)`
+    '--pulse-blur-end': `clamp(40px, ${40 + (count ?? 0) * 160}px, 16000px)`,
+    '--pulse-spread-end': `clamp(0px, ${(count ?? 0) * 128}px, 8000px)`
   } as React.CSSProperties;
 
   return (
