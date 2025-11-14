@@ -1,5 +1,9 @@
+
 import { UserAuth } from "@/components/user-auth";
 import { Counter } from "@/components/counter";
+import { DatabaseView } from "@/components/database-view";
+import { Separator } from "@/components/ui/separator";
+
 
 function CircleIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -27,7 +31,7 @@ export default function Home() {
         <h1 className="text-2xl font-bold text-foreground">ClickSync</h1>
         <UserAuth />
       </header>
-      <main className="flex flex-1 flex-col items-center justify-center gap-12 p-4 text-center md:p-24">
+      <main className="flex flex-1 flex-col items-center justify-center gap-12 p-4 text-center md:p-24 w-full">
         <div className="flex flex-col items-center gap-4">
           <CircleIcon className="w-32 h-32 text-foreground" />
           <h2 className="text-5xl font-extrabold tracking-tighter sm:text-6xl md:text-7xl">
@@ -39,6 +43,8 @@ export default function Home() {
           </p>
         </div>
         <Counter />
+        <Separator className="my-4 md:my-8 max-w-md" />
+        <DatabaseView />
       </main>
       <footer className="w-full p-4 text-center text-sm text-muted-foreground">
         <p>Built with Next.js & Firebase</p>
