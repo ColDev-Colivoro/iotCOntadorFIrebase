@@ -207,8 +207,8 @@ export function Counter({ setShowFire }: CounterProps) {
   const pulseStyle = {
     '--pulse-blur-start': '20px',
     '--pulse-spread-start': '0px',
-    '--pulse-blur-end': `clamp(40px, ${40 + (count ?? 0) * 5}px, 500px)`,
-    '--pulse-spread-end': `clamp(0px, ${(count ?? 0) * 2}px, 200px)`
+    '--pulse-blur-end': `clamp(40px, ${40 + (count ?? 0) * 10}px, 500px)`,
+    '--pulse-spread-end': `clamp(0px, ${(count ?? 0) * 4}px, 200px)`
   } as React.CSSProperties;
 
   return (
