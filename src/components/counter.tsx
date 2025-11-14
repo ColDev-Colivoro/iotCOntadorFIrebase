@@ -207,70 +207,78 @@ export function Counter({ setShowFire }: CounterProps) {
   const pulseStyle = {
     '--pulse-blur-start': '20px',
     '--pulse-spread-start': '0px',
-    '--pulse-blur-end': `clamp(40px, ${40 + (count ?? 0) * 10}px, 500px)`,
-    '--pulse-spread-end': `clamp(0px, ${(count ?? 0) * 4}px, 200px)`
+    '--pulse-blur-end': `clamp(40px, ${40 + (count ?? 0) * 20}px, 1000px)`,
+    '--pulse-spread-end': `clamp(0px, ${(count ?? 0) * 8}px, 500px)`
   } as React.CSSProperties;
 
   return (
      <div className="flex flex-col items-center gap-8">
-        <div className="relative flex flex-col items-center gap-4">
-          <ProgressCircle progress={progress} />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-            <h2 className="text-5xl font-extrabold tracking-tighter sm:text-6xl md:text-7xl">
-              La Super Plataforma de Clics
-            </h2>
-            <p className="max-w-[700px] text-lg text-muted-foreground mt-2">
-              Cada clic es una victoria. Demuestra tu poder.
-            </p>
+      {count === null || count < 100 ? (
+          <>
+          <div className="relative flex flex-col items-center gap-4">
+            <ProgressCircle progress={progress} />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+              <h2 className="text-5xl font-extrabold tracking-tighter sm:text-6xl md:text-7xl">
+                La Super Plataforma de Clics
+              </h2>
+              <p className="max-w-[700px] text-lg text-muted-foreground mt-2">
+                Cada clic es una victoria. Demuestra tu poder.
+              </p>
+            </div>
           </div>
+
+          <Card className="w-full max-w-sm text-center shadow-2xl bg-card/80 backdrop-blur-sm z-10 border-primary/20">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold tracking-tight">Tu Puntuación Universal</CardTitle>
+              <CardDescription>Este es tu contador de poder personal.</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center gap-6">
+              <div className="font-black text-primary transition-all text-8xl md:text-9xl">
+                {count !== null ? (
+                  <span className="tabular-nums">{count.toLocaleString()}</span>
+                ) : (
+                  <div className="h-[96px] w-[180px] animate-pulse rounded-lg bg-muted-foreground/20 md:h-[115px]" />
+                )}
+              </div>
+              <div className="flex flex-col w-full gap-2">
+                <Button
+                  onClick={handleIncrement}
+                  disabled={loading || !user}
+                  className="w-full transform rounded-xl py-8 text-xl font-bold transition-transform duration-100 ease-in-out active:scale-95 animate-cosmic-pulse"
+                  style={pulseStyle}
+                >
+                  {user ? (loading ? '...' : '¡Incrementar Poder!') : <><Lock className="mr-2" /> Inicia sesión para pulsar</>}
+                </Button>
+
+              </div>
+            </CardContent>
+          </Card>
+          </>
+        ) : null}
+        
+        {/* This part is always visible */}
+        <div className="z-20">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" disabled={!user}>
+                  <RotateCcw />
+                  Reiniciar Contador
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>¿Estás absolutely seguro?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta acción no se puede deshacer. Esto reiniciará permanentemente tu contador de clics a 0.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleReset}>Continuar</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
         </div>
-
-        <Card className="w-full max-w-sm text-center shadow-2xl bg-card/80 backdrop-blur-sm z-10 border-primary/20">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold tracking-tight">Tu Puntuación Universal</CardTitle>
-            <CardDescription>Este es tu contador de poder personal.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center gap-6">
-            <div className="font-black text-primary transition-all text-8xl md:text-9xl">
-              {count !== null ? (
-                <span className="tabular-nums">{count.toLocaleString()}</span>
-              ) : (
-                <div className="h-[96px] w-[180px] animate-pulse rounded-lg bg-muted-foreground/20 md:h-[115px]" />
-              )}
-            </div>
-            <div className="flex flex-col w-full gap-2">
-              <Button
-                onClick={handleIncrement}
-                disabled={loading || !user}
-                className="w-full transform rounded-xl py-8 text-xl font-bold transition-transform duration-100 ease-in-out active:scale-95 animate-cosmic-pulse"
-                style={pulseStyle}
-              >
-                {user ? (loading ? '...' : '¡Incrementar Poder!') : <><Lock className="mr-2" /> Inicia sesión para pulsar</>}
-              </Button>
-
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="outline" disabled={!user}>
-                    <RotateCcw />
-                    Reiniciar Contador
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>¿Estás absolutely seguro?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Esta acción no se puede deshacer. Esto reiniciará permanentemente tu contador de clics a 0.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleReset}>Continuar</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          </CardContent>
-        </Card>
     </div>
   );
 }
