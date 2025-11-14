@@ -1,0 +1,107 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the ClickSync application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user."
+        },
+        "googleId": {
+          "type": "string",
+          "description": "The user's unique ID from Google Sign-In."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address.",
+          "format": "email"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The user's display name."
+        }
+      },
+      "required": [
+        "id",
+        "googleId",
+        "email",
+        "displayName"
+      ]
+    },
+    "Counter": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Counter",
+      "type": "object",
+      "description": "Represents the counter value associated with a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the counter."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Counter)"
+        },
+        "value": {
+          "type": "number",
+          "description": "The current value of the counter."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "value"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile data. Uses path-based ownership for private user data.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/counters/{counterId}",
+        "definition": {
+          "entityName": "Counter",
+          "schema": {
+            "$ref": "#/backend/entities/Counter"
+          },
+          "description": "Stores counter values associated with a user. Uses path-based ownership to ensure only the user can access their counters.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            },
+            {
+              "name": "counterId",
+              "description": "The unique identifier of the counter."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to ensure secure and scalable data management for the ClickSync application, focusing on authorization independence and clear access control. User data and counter values are separated into distinct collections with path-based ownership to simplify security rules and eliminate the need for complex `get()` calls.\n\n1.  **Authorization Independence:** The structure enforces authorization independence by avoiding hierarchical dependencies. User data and counter data are stored in separate collections under the respective user's ID, allowing for direct access without needing to traverse parent documents.\n\n2.  **Structural Segregation:** The design segregates data based on access needs. User-specific data (counters) is stored under `/users/{userId}`, ensuring that only the user has access to their data. This simplifies security rules and prevents unintended data exposure.\n\n3.  **Access Modeling:** The design implements path-based ownership for private user data (counters). The path `/users/{userId}/counters/{counterId}` clearly defines that the counter belongs to the specified user, making authorization rules straightforward.\n\n4. **QAPs:** Using segregation and direct ownership, listing counters is secure and efficient. Rules can simply check that `request.auth.uid == userId` when listing items in the `/users/{userId}/counters` collection, guaranteeing that only the authenticated user can list their own counters."
+  }
+}
