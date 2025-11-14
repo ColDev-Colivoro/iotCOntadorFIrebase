@@ -1,6 +1,25 @@
 import { UserAuth } from "@/components/user-auth";
 import { Counter } from "@/components/counter";
 
+function CircleIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="10" />
+    </svg>
+  );
+}
+
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col items-center bg-background">
@@ -10,6 +29,7 @@ export default function Home() {
       </header>
       <main className="flex flex-1 flex-col items-center justify-center gap-12 p-4 text-center md:p-24">
         <div className="flex flex-col items-center gap-4">
+          <CircleIcon className="w-32 h-32 text-foreground" />
           <h2 className="text-5xl font-extrabold tracking-tighter sm:text-6xl md:text-7xl">
             One Button, One Universe
           </h2>
