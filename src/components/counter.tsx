@@ -1,17 +1,15 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
-import { doc, onSnapshot, setDoc, increment } from "firebase/firestore";
-import { useUser, useFirestore } from "@/firebase";
+import { useState, useEffect, useMemo } from "react";
+import { doc, onSnapshot, setDoc, increment, serverTimestamp } from "firebase/firestore";
+import { useUser, useFirestore, useMemoFirebase } from "@/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Lock } from "lucide-react";
 import { FirestorePermissionError } from "@/firebase/errors";
 import { errorEmitter } from "@/firebase/error-emitter";
-
-const COUNTER_DOC_PATH = "counters/main_counter";
 
 export function Counter() {
   const { user } = useUser();
@@ -20,40 +18,45 @@ export function Counter() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
+  const counterDocRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, "users", user.uid, "counters", "user_counter");
+  }, [firestore, user]);
+
   useEffect(() => {
-    if (!firestore) return;
-    const docRef = doc(firestore, COUNTER_DOC_PATH);
+    if (!counterDocRef) {
+      setCount(0); // If no user, show 0
+      return;
+    }
 
     const unsubscribe = onSnapshot(
-      docRef,
+      counterDocRef,
       (docSnap) => {
         if (docSnap.exists()) {
           setCount(docSnap.data().value);
         } else {
-          // The document doesn't exist, so we show 0.
-          // A user's first click will create it.
           setCount(0);
         }
       },
       (error) => {
         const contextualError = new FirestorePermissionError({
           operation: 'get',
-          path: docRef.path,
+          path: counterDocRef.path,
         });
         errorEmitter.emit('permission-error', contextualError);
         toast({
           title: "Connection Error",
-          description: "Could not connect to the database.",
+          description: "Could not connect to your counter.",
           variant: "destructive",
         });
       }
     );
 
     return () => unsubscribe();
-  }, [firestore, toast]);
+  }, [counterDocRef, toast]);
 
   const handleIncrement = () => {
-    if (!user) {
+    if (!user || !counterDocRef) {
       toast({
         title: "Authentication Required",
         description: "You must be signed in to click the button.",
@@ -61,23 +64,19 @@ export function Counter() {
       return;
     }
 
-    if (!firestore) return;
-
     setLoading(true);
-    const docRef = doc(firestore, COUNTER_DOC_PATH);
-    const data = { value: increment(1) };
+    const data = { value: increment(1), updatedAt: serverTimestamp() };
     
-    setDoc(docRef, data, { merge: true })
+    setDoc(counterDocRef, data, { merge: true })
       .catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
-          path: docRef.path,
+          path: counterDocRef.path,
           operation: 'update',
           requestResourceData: data,
         });
         errorEmitter.emit('permission-error', permissionError);
       })
       .finally(() => {
-        // Add a small delay to prevent spamming
         setTimeout(() => setLoading(false), 300);
       });
   };
@@ -85,8 +84,8 @@ export function Counter() {
   return (
     <Card className="w-full max-w-sm text-center shadow-2xl bg-card/80 backdrop-blur-sm">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold tracking-tight">Global Click Count</CardTitle>
-        <CardDescription>This counter updates in real-time for everyone.</CardDescription>
+        <CardTitle className="text-2xl font-bold tracking-tight">Your Click Count</CardTitle>
+        <CardDescription>This is your personal click counter.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col items-center gap-8">
         <div className="font-black text-primary transition-all text-8xl md:text-9xl">

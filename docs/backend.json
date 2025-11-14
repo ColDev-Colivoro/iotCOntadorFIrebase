@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "User": {
@@ -8,11 +9,7 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the user."
-        },
-        "googleId": {
-          "type": "string",
-          "description": "The user's unique ID from Google Sign-In."
+          "description": "Unique identifier for the user (matches auth.uid)."
         },
         "email": {
           "type": "string",
@@ -24,43 +21,29 @@
           "description": "The user's display name."
         }
       },
-      "required": [
-        "id",
-        "googleId",
-        "email",
-        "displayName"
-      ]
+      "required": ["id", "email", "displayName"]
     },
     "Counter": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Counter",
       "type": "object",
-      "description": "Represents the counter value associated with a user.",
+      "description": "Represents a counter value associated with a single user.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the counter."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N Counter)"
-        },
         "value": {
           "type": "number",
           "description": "The current value of the counter."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp of the last update."
         }
       },
-      "required": [
-        "id",
-        "userId",
-        "value"
-      ]
+      "required": ["value", "updatedAt"]
     }
   },
   "auth": {
-    "providers": [
-      "google.com"
-    ]
+    "providers": ["google.com"]
   },
   "firestore": {
     "structure": [
@@ -68,39 +51,19 @@
         "path": "/users/{userId}",
         "definition": {
           "entityName": "User",
-          "schema": {
-            "$ref": "#/backend/entities/User"
-          },
-          "description": "Stores user profile data. Uses path-based ownership for private user data.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            }
-          ]
+          "schema": { "$ref": "#/backend/entities/User" },
+          "description": "Stores public user profile data. The document ID must match the user's Firebase Auth UID."
         }
       },
       {
-        "path": "/users/{userId}/counters/{counterId}",
+        "path": "/users/{userId}/counters/user_counter",
         "definition": {
           "entityName": "Counter",
-          "schema": {
-            "$ref": "#/backend/entities/Counter"
-          },
-          "description": "Stores counter values associated with a user. Uses path-based ownership to ensure only the user can access their counters.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            },
-            {
-              "name": "counterId",
-              "description": "The unique identifier of the counter."
-            }
-          ]
+          "schema": { "$ref": "#/backend/entities/Counter" },
+          "description": "Stores a private counter for each user. Access is restricted by security rules to the user whose UID matches {userId}."
         }
       }
     ],
-    "reasoning": "The Firestore structure is designed to ensure secure and scalable data management for the ClickSync application, focusing on authorization independence and clear access control. User data and counter values are separated into distinct collections with path-based ownership to simplify security rules and eliminate the need for complex `get()` calls.\n\n1.  **Authorization Independence:** The structure enforces authorization independence by avoiding hierarchical dependencies. User data and counter data are stored in separate collections under the respective user's ID, allowing for direct access without needing to traverse parent documents.\n\n2.  **Structural Segregation:** The design segregates data based on access needs. User-specific data (counters) is stored under `/users/{userId}`, ensuring that only the user has access to their data. This simplifies security rules and prevents unintended data exposure.\n\n3.  **Access Modeling:** The design implements path-based ownership for private user data (counters). The path `/users/{userId}/counters/{counterId}` clearly defines that the counter belongs to the specified user, making authorization rules straightforward.\n\n4. **QAPs:** Using segregation and direct ownership, listing counters is secure and efficient. Rules can simply check that `request.auth.uid == userId` when listing items in the `/users/{userId}/counters` collection, guaranteeing that only the authenticated user can list their own counters."
+    "reasoning": "The data is structured around users. A top-level 'users' collection holds all user-related data. Each user has a document ID matching their Firebase Authentication UID. Sub-collections within each user's document, like 'counters', store data that is private to that user. This path-based ownership model makes writing secure and efficient Firestore security rules straightforward, as rules can simply check if the requesting user's UID matches the {userId} in the document path."
   }
 }
