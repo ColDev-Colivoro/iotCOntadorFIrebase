@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { doc, onSnapshot, setDoc, increment, serverTimestamp } from "firebase/firestore";
 import { useUser, useFirestore, useMemoFirebase } from "@/firebase";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ export function Counter() {
     return doc(firestore, "users", user.uid, "counters", "user_counter");
   }, [firestore, user]);
 
-  useState(() => {
+  useEffect(() => {
     if (!counterDocRef) {
       setCount(0); // If no user, show 0
       return;
@@ -46,11 +46,7 @@ export function Counter() {
         if (docSnap.exists()) {
           setCount(docSnap.data().value);
         } else {
-          // If the document doesn't exist, create it.
-          if (user) {
-             setDoc(counterDocRef, { value: 0, updatedAt: serverTimestamp() }, { merge: true });
-          }
-          setCount(0);
+          setCount(0); // If doc doesn't exist yet, display 0
         }
       },
       (error) => {
@@ -82,6 +78,8 @@ export function Counter() {
     setLoading(true);
     const data = { value: increment(1), updatedAt: serverTimestamp() };
     
+    // Using { merge: true } will create the document if it doesn't exist,
+    // or update it if it does. This simplifies the logic.
     setDoc(counterDocRef, data, { merge: true })
       .catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
