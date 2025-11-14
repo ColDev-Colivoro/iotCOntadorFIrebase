@@ -76,7 +76,7 @@ export function Counter() {
 
     setLoading(true);
     const newCount = (count ?? 0) + 1;
-    if (newCount > 0 && newCount % 20 === 0) {
+    if (newCount > 0 && newCount % 10 === 0) {
       toast({
         title: "¡¡SINGULARIDAD ALCANZADA!!",
         description: `¡Has superado los ${newCount} clics! Tu poder está reescribiendo las leyes de la realidad.`,
@@ -139,7 +139,7 @@ export function Counter() {
       });
   };
   
-  const progress = count !== null ? count % 20 : 0;
+  const progress = count !== null ? count % 10 : 0;
 
   return (
      <div className="flex flex-col items-center gap-8">

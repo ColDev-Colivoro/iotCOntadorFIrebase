@@ -9,7 +9,7 @@ interface ProgressCircleProps {
   className?: string;
 }
 
-const TOTAL_SEGMENTS = 20;
+const TOTAL_SEGMENTS = 10;
 
 export function ProgressCircle({ progress, className }: ProgressCircleProps) {
   const segments = Array.from({ length: TOTAL_SEGMENTS }, (_, i) => {
