@@ -14,11 +14,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { GoogleIcon } from "@/components/icons";
-import { useAuth, useUser } from "@/firebase";
+import { useFirebase } from "@/firebase";
 
 export function UserAuth() {
-  const { user } = useUser();
-  const auth = useAuth();
+  const { user, auth } = useFirebase();
   const { toast } = useToast();
 
   const handleSignIn = async () => {
