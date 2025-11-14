@@ -35,11 +35,11 @@ export default function Home() {
         <div className="flex flex-col items-center gap-4">
           <CircleIcon className="w-32 h-32 text-foreground" />
           <h2 className="text-5xl font-extrabold tracking-tighter sm:text-6xl md:text-7xl">
-            One Button, One Universe
+            Un Botón, Un Universo
           </h2>
           <p className="max-w-[700px] text-lg text-muted-foreground">
-            Join thousands of users in a collaborative clicking experiment. Every
-            click matters.
+            Únete a miles de usuarios en un experimento de clics colaborativo. Cada
+            clic importa.
           </p>
         </div>
         <Counter />
@@ -47,7 +47,6 @@ export default function Home() {
         <DatabaseView />
       </main>
       <footer className="w-full p-4 text-center text-sm text-muted-foreground">
-        <p>Built with Next.js & Firebase</p>
       </footer>
     </div>
   );

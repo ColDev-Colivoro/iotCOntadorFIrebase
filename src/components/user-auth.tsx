@@ -24,18 +24,17 @@ export function UserAuth() {
     const provider = new GoogleAuthProvider();
     try {
       if (!auth) return;
-      // Using signInWithPopup to avoid redirect issues in this environment
       await signInWithPopup(auth, provider);
     } catch (error: any) {
       console.error("Error signing in with Google: ", error);
-      let description = "There was an error signing in. Please try again.";
+      let description = "Hubo un error al iniciar sesión. Por favor, inténtalo de nuevo.";
       if (error.code === 'auth/popup-blocked') {
-        description = "Popup blocked by browser. Please allow popups for this site and try again.";
+        description = "El navegador bloqueó la ventana emergente. Por favor, permite las ventanas emergentes para este sitio e inténtalo de nuevo.";
       } else if (error.code === 'auth/unauthorized-domain') {
-        description = "This domain is not authorized for sign-in. Please add it to your Firebase project settings.";
+        description = "Este dominio no está autorizado para iniciar sesión. Por favor, añádelo a la configuración de tu proyecto de Firebase.";
       }
       toast({
-        title: "Sign-in Failed",
+        title: "Fallo al Iniciar Sesión",
         description: description,
         variant: "destructive",
       });
@@ -49,8 +48,8 @@ export function UserAuth() {
     } catch (error: any) {
       console.error("Error signing out: ", error);
       toast({
-        title: "Sign-out Failed",
-        description: error.message || "There was an error signing out. Please try again.",
+        title: "Fallo al Cerrar Sesión",
+        description: error.message || "Hubo un error al cerrar sesión. Por favor, inténtalo de nuevo.",
         variant: "destructive",
       });
     }
@@ -76,7 +75,7 @@ export function UserAuth() {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleSignOut}>
-            Sign out
+            Cerrar sesión
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -86,7 +85,7 @@ export function UserAuth() {
   return (
     <Button onClick={handleSignIn} variant="outline">
       <GoogleIcon className="mr-2 h-4 w-4" />
-      Sign in with Google
+      Iniciar sesión con Google
     </Button>
   );
 }

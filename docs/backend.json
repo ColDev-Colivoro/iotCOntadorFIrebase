@@ -40,6 +40,24 @@
         }
       },
       "required": ["value", "updatedAt"]
+    },
+    "ResetLog": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ResetLog",
+      "type": "object",
+      "description": "Stores a log of a counter reset event.",
+      "properties": {
+        "resetAtValue": {
+          "type": "number",
+          "description": "The value of the counter when it was reset."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp of the reset event."
+        }
+      },
+      "required": ["resetAtValue", "timestamp"]
     }
   },
   "auth": {
@@ -62,8 +80,16 @@
           "schema": { "$ref": "#/backend/entities/Counter" },
           "description": "Stores a private counter for each user. Access is restricted by security rules to the user whose UID matches {userId}."
         }
+      },
+      {
+        "path": "/users/{userId}/resets/{resetId}",
+        "definition": {
+          "entityName": "ResetLog",
+          "schema": { "$ref": "#/backend/entities/ResetLog" },
+          "description": "Stores a log of each time a user resets their counter. Write access is restricted to the owning user."
+        }
       }
     ],
-    "reasoning": "The data is structured around users. A top-level 'users' collection holds all user-related data. Each user has a document ID matching their Firebase Authentication UID. Sub-collections within each user's document, like 'counters', store data that is private to that user. This path-based ownership model makes writing secure and efficient Firestore security rules straightforward, as rules can simply check if the requesting user's UID matches the {userId} in the document path."
+    "reasoning": "The data is structured around users. A top-level 'users' collection holds all user-related data. Each user has a document ID matching their Firebase Authentication UID. Sub-collections within each user's document, like 'counters' and 'resets', store data that is private or related to that user. This path-based ownership model makes writing secure and efficient Firestore security rules straightforward."
   }
 }

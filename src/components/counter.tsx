@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { doc, onSnapshot, setDoc, increment, serverTimestamp } from "firebase/firestore";
+import { doc, onSnapshot, setDoc, increment, serverTimestamp, collection, addDoc } from "firebase/firestore";
 import { useUser, useFirestore, useMemoFirebase } from "@/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -50,14 +50,15 @@ export function Counter() {
         }
       },
       (error) => {
+        if (!counterDocRef) return;
         const contextualError = new FirestorePermissionError({
           operation: 'get',
           path: counterDocRef.path,
         });
         errorEmitter.emit('permission-error', contextualError);
         toast({
-          title: "Connection Error",
-          description: "Could not connect to your counter.",
+          title: "Error de Conexión",
+          description: "No se pudo conectar a tu contador.",
           variant: "destructive",
         });
       }
@@ -69,8 +70,8 @@ export function Counter() {
   const handleIncrement = () => {
     if (!user || !counterDocRef) {
       toast({
-        title: "Authentication Required",
-        description: "You must be signed in to click the button.",
+        title: "Autenticación Requerida",
+        description: "Debes iniciar sesión para pulsar el botón.",
       });
       return;
     }
@@ -78,8 +79,6 @@ export function Counter() {
     setLoading(true);
     const data = { value: increment(1), updatedAt: serverTimestamp() };
     
-    // Using { merge: true } will create the document if it doesn't exist,
-    // or update it if it does. This simplifies the logic.
     setDoc(counterDocRef, data, { merge: true })
       .catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
@@ -95,22 +94,38 @@ export function Counter() {
   };
 
   const handleReset = () => {
-    if (!user || !counterDocRef) {
+    if (!user || !firestore || !counterDocRef || count === null) {
       toast({
-        title: "Authentication Required",
-        description: "You must be signed in to reset the counter.",
+        title: "Autenticación Requerida",
+        description: "Debes iniciar sesión para reiniciar el contador.",
       });
       return;
     }
 
-    const data = { value: 0, updatedAt: serverTimestamp() };
-    
-    setDoc(counterDocRef, data, { merge: true })
+    // Save reset log
+    const resetsColRef = collection(firestore, "users", user.uid, "resets");
+    const resetLogData = {
+      resetAtValue: count,
+      timestamp: serverTimestamp()
+    };
+    addDoc(resetsColRef, resetLogData)
+    .catch(async (serverError) => {
+      const permissionError = new FirestorePermissionError({
+        path: resetsColRef.path,
+        operation: 'create',
+        requestResourceData: resetLogData,
+      });
+      errorEmitter.emit('permission-error', permissionError);
+    });
+
+    // Reset counter
+    const counterData = { value: 0, updatedAt: serverTimestamp() };
+    setDoc(counterDocRef, counterData, { merge: true })
       .catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
           path: counterDocRef.path,
           operation: 'update',
-          requestResourceData: data,
+          requestResourceData: counterData,
         });
         errorEmitter.emit('permission-error', permissionError);
       });
@@ -119,8 +134,8 @@ export function Counter() {
   return (
     <Card className="w-full max-w-sm text-center shadow-2xl bg-card/80 backdrop-blur-sm">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold tracking-tight">Your Click Count</CardTitle>
-        <CardDescription>This is your personal click counter.</CardDescription>
+        <CardTitle className="text-2xl font-bold tracking-tight">Tu Contador de Clics</CardTitle>
+        <CardDescription>Este es tu contador personal de clics.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col items-center gap-6">
         <div className="font-black text-primary transition-all text-8xl md:text-9xl">
@@ -136,27 +151,26 @@ export function Counter() {
             disabled={loading || !user}
             className="w-full transform rounded-xl py-6 text-lg font-bold transition-transform duration-100 ease-in-out active:scale-95"
           >
-            {user ? (loading ? '...' : 'Click Me!') : <><Lock className="mr-2" /> Sign in to Click</>}
+            {user ? (loading ? '...' : '¡Púlsame!') : <><Lock className="mr-2" /> Inicia sesión para pulsar</>}
           </Button>
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="outline" disabled={!user}>
                 <RotateCcw />
-                Reset Count
+                Reiniciar Contador
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogTitle>¿Estás absolutamente seguro?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone. This will permanently reset your click
-                  count to 0.
+                  Esta acción no se puede deshacer. Esto reiniciará permanentemente tu contador de clics a 0.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleReset}>Continue</AlertDialogAction>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={handleReset}>Continuar</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>

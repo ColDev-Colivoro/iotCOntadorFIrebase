@@ -1,3 +1,4 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -10,6 +11,13 @@ service cloud.firestore {
       match /counters/{counterId} {
         allow read: if true;
         allow write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // Users can only create reset logs for their own account.
+      match /resets/{resetId} {
+        allow read, create: if request.auth != null && request.auth.uid == userId;
+        // No updates or deletes allowed to preserve history.
+        allow update, delete: if false;
       }
     }
   }

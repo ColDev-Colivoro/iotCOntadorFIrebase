@@ -33,7 +33,6 @@ export function DatabaseView() {
 
   const countersQuery = useMemoFirebase(() => {
     if (!firestore) return null;
-    // Query the 'counters' collection group to get all counters from all users.
     return query(collectionGroup(firestore, 'counters'));
   }, [firestore]);
 
@@ -41,7 +40,6 @@ export function DatabaseView() {
 
   const sortedCounters = useMemo(() => {
     if (!counters) return [];
-    // Sort counters by value in descending order
     return [...counters].sort((a, b) => b.value - a.value);
   }, [counters]);
 
@@ -60,16 +58,16 @@ export function DatabaseView() {
        return (
         <Alert variant="destructive">
           <Terminal className="h-4 w-4" />
-          <AlertTitle>Query Error</AlertTitle>
+          <AlertTitle>Error de Consulta</AlertTitle>
           <AlertDescription>
-            Could not fetch data from Firestore. Check security rules and console for errors.
+            No se pudieron obtener los datos de Firestore. Revisa las reglas de seguridad y la consola para ver errores.
           </AlertDescription>
         </Alert>
       );
     }
     
     if (!counters || counters.length === 0) {
-      return <p className="text-sm text-muted-foreground text-center py-4">No counters found. Start clicking!</p>;
+      return <p className="text-sm text-muted-foreground text-center py-4">No se encontraron contadores. ¡Empieza a pulsar!</p>;
     }
 
     return (
@@ -77,8 +75,8 @@ export function DatabaseView() {
         <Table>
           <TableHeader className="sticky top-0 bg-card">
             <TableRow>
-              <TableHead className="w-[150px]">User ID</TableHead>
-              <TableHead className="text-right">Count</TableHead>
+              <TableHead className="w-[150px]">ID de Usuario</TableHead>
+              <TableHead className="text-right">Clics</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -100,16 +98,16 @@ export function DatabaseView() {
         <CollapsibleTrigger asChild>
           <Button variant="ghost">
             <ChevronsUpDown className="w-4 h-4 mr-2" />
-            Live Database View
+            Vista de la Base de Datos en Vivo
           </Button>
         </CollapsibleTrigger>
       </div>
       <CollapsibleContent>
         <Card className="w-full mt-2 shadow-inner bg-card/50">
           <CardHeader>
-            <CardTitle>All User Counters</CardTitle>
+            <CardTitle>Contadores de Todos los Usuarios</CardTitle>
             <CardDescription>
-              This is a live view of all click counts stored in the database.
+              Esta es una vista en tiempo real de todos los contadores de clics almacenados en la base de datos.
             </CardDescription>
           </CardHeader>
           <CardContent>
