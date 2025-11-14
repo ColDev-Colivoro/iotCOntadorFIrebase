@@ -78,8 +78,10 @@ export function Counter() {
     const newCount = (count ?? 0) + 1;
     if (newCount > 0 && newCount % 20 === 0) {
       toast({
-        title: "¡Nivel Superado!",
-        description: `¡Has alcanzado ${newCount} clics! Sigue así.`,
+        title: "¡Poder Cósmico Desatado!",
+        description: `¡Has superado el límite de ${newCount}! Tu poder es inconmensurable.`,
+        variant: "default",
+        duration: 5000,
       });
     }
 
@@ -153,7 +155,7 @@ export function Counter() {
           </div>
         </div>
 
-        <Card className="w-full max-w-sm text-center shadow-2xl bg-card/80 backdrop-blur-sm z-10">
+        <Card className="w-full max-w-sm text-center shadow-2xl bg-card/80 backdrop-blur-sm z-10 border-primary/20">
           <CardHeader>
             <CardTitle className="text-2xl font-bold tracking-tight">Tu Puntuación Universal</CardTitle>
             <CardDescription>Este es tu contador de poder personal.</CardDescription>
@@ -170,7 +172,7 @@ export function Counter() {
               <Button
                 onClick={handleIncrement}
                 disabled={loading || !user}
-                className="w-full transform rounded-xl py-6 text-lg font-bold transition-transform duration-100 ease-in-out active:scale-95"
+                className="w-full transform rounded-xl py-8 text-xl font-bold transition-transform duration-100 ease-in-out active:scale-95 shadow-[0_0_20px_hsl(var(--primary))]"
               >
                 {user ? (loading ? '...' : '¡Incrementar Poder!') : <><Lock className="mr-2" /> Inicia sesión para pulsar</>}
               </Button>
