@@ -1,7 +1,7 @@
 
 "use client";
 
-import { GoogleAuthProvider, signInWithRedirect, signOut } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -24,12 +24,18 @@ export function UserAuth() {
     const provider = new GoogleAuthProvider();
     try {
       if (!auth) return;
-      await signInWithRedirect(auth, provider);
+      await signInWithPopup(auth, provider);
     } catch (error: any) {
       console.error("Error signing in with Google: ", error);
+      let description = "There was an error signing in. Please try again.";
+      if (error.code === 'auth/popup-blocked') {
+        description = "Popup blocked by browser. Please allow popups for this site and try again.";
+      } else if (error.code === 'auth/unauthorized-domain') {
+        description = "This domain is not authorized for sign-in. Please add it to your Firebase project settings.";
+      }
       toast({
         title: "Sign-in Failed",
-        description: error.message || "There was an error signing in. Please try again.",
+        description: description,
         variant: "destructive",
       });
     }
