@@ -78,8 +78,8 @@ export function Counter() {
     const newCount = (count ?? 0) + 1;
     if (newCount > 0 && newCount % 20 === 0) {
       toast({
-        title: "¡Poder Cósmico Desatado!",
-        description: `¡Has superado el límite de ${newCount}! Tu poder es inconmensurable.`,
+        title: "¡¡SINGULARIDAD ALCANZADA!!",
+        description: `¡Has superado los ${newCount} clics! Tu poder está reescribiendo las leyes de la realidad.`,
         variant: "default",
         duration: 5000,
       });
@@ -186,7 +186,7 @@ export function Counter() {
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>¿Estás absolutamente seguro?</AlertDialogTitle>
+                    <AlertDialogTitle>¿Estás absolutely seguro?</AlertDialogTitle>
                     <AlertDialogDescription>
                       Esta acción no se puede deshacer. Esto reiniciará permanentemente tu contador de clics a 0.
                     </AlertDialogDescription>

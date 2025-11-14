@@ -88,10 +88,20 @@ export default {
             height: '0',
           },
         },
+        'cosmic-pulse': {
+          '0%, 100%': { transform: 'scale(1)', boxShadow: '0 0 20px hsl(var(--primary))' },
+          '50%': { transform: 'scale(1.05)', boxShadow: '0 0 40px hsl(var(--accent)), 0 0 60px hsl(var(--primary))' },
+        },
+        'epic-enter': {
+           '0%': { transform: 'scale(0.5) rotate(-15deg)', opacity: '0' },
+           '100%': { transform: 'scale(1) rotate(0deg)', opacity: '1' },
+        }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'cosmic-pulse': 'cosmic-pulse 1.5s ease-in-out infinite',
+        'epic-enter': 'epic-enter 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both',
       },
     },
   },
