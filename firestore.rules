@@ -1,16 +1,16 @@
-
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow public read access to counters for the leaderboard view
-    match /users/{userId}/counters/{counterId} {
-      allow read: if true;
-      allow write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // Keep other user data private
     match /users/{userId} {
+      // Users can only read and write their own profile data.
       allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // The leaderboard needs to be public, so anyone can read the counters.
+      // However, only the owner of the counter can update it.
+      match /counters/{counterId} {
+        allow read: if true;
+        allow write: if request.auth != null && request.auth.uid == userId;
+      }
     }
   }
 }
