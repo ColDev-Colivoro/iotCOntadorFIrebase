@@ -1,8 +1,7 @@
+
 "use client";
 
 import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase";
-import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -15,14 +14,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { GoogleIcon } from "@/components/icons";
+import { useAuth, useUser } from "@/firebase";
 
 export function UserAuth() {
-  const { user } = useAuth();
+  const { user } = useUser();
+  const auth = useAuth();
   const { toast } = useToast();
 
   const handleSignIn = async () => {
     const provider = new GoogleAuthProvider();
     try {
+      if (!auth) return;
       await signInWithPopup(auth, provider);
     } catch (error) {
       console.error("Error signing in with Google: ", error);
@@ -36,6 +38,7 @@ export function UserAuth() {
 
   const handleSignOut = async () => {
     try {
+      if (!auth) return;
       await signOut(auth);
     } catch (error) {
       console.error("Error signing out: ", error);

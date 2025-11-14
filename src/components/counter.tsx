@@ -1,24 +1,28 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
 import { doc, onSnapshot, setDoc, increment } from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import { useAuth } from "@/hooks/use-auth";
+import { useUser, useFirestore } from "@/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Lock } from "lucide-react";
+import { FirestorePermissionError } from "@/firebase/errors";
+import { errorEmitter } from "@/firebase/error-emitter";
 
 const COUNTER_DOC_PATH = "counters/main_counter";
 
 export function Counter() {
-  const { user } = useAuth();
+  const { user } = useUser();
+  const firestore = useFirestore();
   const [count, setCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    const docRef = doc(db, COUNTER_DOC_PATH);
+    if (!firestore) return;
+    const docRef = doc(firestore, COUNTER_DOC_PATH);
 
     const unsubscribe = onSnapshot(
       docRef,
@@ -26,13 +30,17 @@ export function Counter() {
         if (docSnap.exists()) {
           setCount(docSnap.data().value);
         } else {
-          // If the document doesn't exist, initialize it.
+          // The document doesn't exist, so we show 0.
+          // A user's first click will create it.
           setCount(0);
-          setDoc(docRef, { value: 0 });
         }
       },
       (error) => {
-        console.error("Error listening to counter:", error);
+        const contextualError = new FirestorePermissionError({
+          operation: 'get',
+          path: docRef.path,
+        });
+        errorEmitter.emit('permission-error', contextualError);
         toast({
           title: "Connection Error",
           description: "Could not connect to the database.",
@@ -42,9 +50,9 @@ export function Counter() {
     );
 
     return () => unsubscribe();
-  }, [toast]);
+  }, [firestore, toast]);
 
-  const handleIncrement = async () => {
+  const handleIncrement = () => {
     if (!user) {
       toast({
         title: "Authentication Required",
@@ -53,21 +61,25 @@ export function Counter() {
       return;
     }
 
+    if (!firestore) return;
+
     setLoading(true);
-    try {
-      const docRef = doc(db, COUNTER_DOC_PATH);
-      await setDoc(docRef, { value: increment(1) }, { merge: true });
-    } catch (error) {
-      console.error("Error incrementing counter:", error);
-      toast({
-        title: "Update Failed",
-        description: "Could not update the counter. Please try again.",
-        variant: "destructive",
+    const docRef = doc(firestore, COUNTER_DOC_PATH);
+    const data = { value: increment(1) };
+    
+    setDoc(docRef, data, { merge: true })
+      .catch(async (serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: docRef.path,
+          operation: 'update',
+          requestResourceData: data,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      })
+      .finally(() => {
+        // Add a small delay to prevent spamming
+        setTimeout(() => setLoading(false), 300);
       });
-    } finally {
-      // Add a small delay to prevent spamming
-      setTimeout(() => setLoading(false), 300);
-    }
   };
 
   return (
@@ -87,7 +99,7 @@ export function Counter() {
         <Button
           onClick={handleIncrement}
           disabled={loading || !user}
-          className="w-full transform rounded-xl py-6 text-lg font-bold transition-transform duration-150 ease-in-out active:scale-95"
+          className="w-full transform rounded-xl py-6 text-lg font-bold transition-transform duration-100 ease-in-out active:scale-95"
         >
           {user ? (loading ? '...' : 'Click Me!') : <><Lock className="mr-2" /> Sign in to Click</>}
         </Button>
