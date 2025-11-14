@@ -24,6 +24,7 @@ export function UserAuth() {
     const provider = new GoogleAuthProvider();
     try {
       if (!auth) return;
+      // Using signInWithPopup to avoid redirect issues in this environment
       await signInWithPopup(auth, provider);
     } catch (error: any) {
       console.error("Error signing in with Google: ", error);
